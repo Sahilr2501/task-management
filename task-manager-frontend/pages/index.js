@@ -1,22 +1,32 @@
-import { useEffect, useContext } from 'react';
-import { useRouter } from 'next/router';
-import { AuthContext } from '../context/AuthContext';
+import dynamic from 'next/dynamic';
 
-export default function Home() {
-    const router = useRouter();
-    const { user } = useContext(AuthContext);
+const HomePage = () => {
+    const { useEffect, useContext } = require('react');
+    const { useRouter } = require('next/router');
+    const { AuthContext } = require('../context/AuthContext');
 
-    useEffect(() => {
-        if (user) {
-            router.push('/dashboard');
-        } else {
-            router.push('/login');
-        }
-    }, [user, router]);
+    function Home() {
+        const router = useRouter();
+        const { user } = useContext(AuthContext);
 
-    return (
-        <div className="flex justify-center items-center min-h-screen">
-            <p className="text-gray-600">Redirecting...</p>
-        </div>
-    );
-}
+        useEffect(() => {
+            if (user) {
+                router.push('/dashboard');
+            } else {
+                router.push('/login');
+            }
+        }, [user, router]);
+
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <p className="text-gray-600">Redirecting...</p>
+            </div>
+        );
+    }
+
+    return <Home />;
+};
+
+export default dynamic(() => Promise.resolve(HomePage), {
+    ssr: false
+});
