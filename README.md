@@ -37,11 +37,6 @@ The application uses a carefully selected color scheme:
 - Task filtering and sorting
 - Quick task creation
 - Task status visualization
-- Analytics dashboard with:
-  - Task completion rates
-  - Overdue task trends
-  - User performance metrics
-  - Team productivity insights
 
 ### Notifications
 - Real-time notifications using WebSocket

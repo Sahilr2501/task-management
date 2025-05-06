@@ -5,7 +5,6 @@ const CACHE_NAME = 'task-manager-v1';
 const urlsToCache = [
     '/',
     '/dashboard',
-    '/analytics',
     '/login',
     '/register',
     '/manifest.json',
