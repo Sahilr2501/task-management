@@ -21,10 +21,20 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// API routes
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
+
+// Serve static files from the React app
 app.use(express.static(join(__dirname, '../task-manager-frontend/dist')));
-app.get('*', (req, res) => {
+
+// Handle React routing, return all requests to React app
+app.get('/', (req, res) => {
+    res.sendFile(join(__dirname, '../task-manager-frontend/dist/index.html'));
+});
+
+// Handle all other routes
+app.get('/:path', (req, res) => {
     res.sendFile(join(__dirname, '../task-manager-frontend/dist/index.html'));
 });
 

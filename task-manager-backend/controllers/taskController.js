@@ -1,6 +1,6 @@
-const Task = require('../models/Task');
+import Task from '../models/Task.js';
 
-exports.createTask = async (req, res) => {
+export const createTask = async (req, res) => {
     try {
         // Validate required fields
         if (!req.body.title) {
@@ -30,7 +30,7 @@ exports.createTask = async (req, res) => {
     }
 };
 
-exports.getMyTasks = async (req, res) => {
+export const getMyTasks = async (req, res) => {
     try {
         const tasks = await Task.find({ assignedTo: req.user._id });
         res.json(tasks);
@@ -40,7 +40,7 @@ exports.getMyTasks = async (req, res) => {
     }
 };
 
-exports.getCreatedTasks = async (req, res) => {
+export const getCreatedTasks = async (req, res) => {
     try {
         const tasks = await Task.find({ createdBy: req.user._id });
         res.json(tasks);
@@ -50,7 +50,7 @@ exports.getCreatedTasks = async (req, res) => {
     }
 };
 
-exports.getAllTasks = async (req, res) => {
+export const getAllTasks = async (req, res) => {
     try {
         const tasks = await Task.find({
             $or: [
@@ -65,7 +65,7 @@ exports.getAllTasks = async (req, res) => {
     }
 };
 
-exports.updateTask = async (req, res) => {
+export const updateTask = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
 
@@ -94,7 +94,7 @@ exports.updateTask = async (req, res) => {
     }
 };
 
-exports.deleteTask = async (req, res) => {
+export const deleteTask = async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
 
