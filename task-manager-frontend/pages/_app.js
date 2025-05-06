@@ -7,7 +7,7 @@ const Navbar = dynamic(() => import('../components/Navbar'), {
     ssr: false
 });
 
-export default function App({ Component, pageProps }) {
+function MyApp({ Component, pageProps }) {
     return (
         <AuthProvider>
             <Navbar />
@@ -15,3 +15,5 @@ export default function App({ Component, pageProps }) {
         </AuthProvider>
     );
 }
+
+export default MyApp;
