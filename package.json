@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/Sahilr2501/task-management/issues"
   },
-  "homepage": "https://github.com/Sahilr2501/task-management#readme"
+  "homepage": "https://github.com/Sahilr2501/task-management#readme",
+  "dependencies": {
+    "next": "^15.3.1"
+  }
 }
