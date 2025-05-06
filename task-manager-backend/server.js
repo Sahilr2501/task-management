@@ -26,16 +26,20 @@ app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
 
 // Serve static files from the React app
-app.use(express.static(join(__dirname, '../task-manager-frontend/dist')));
+const frontendPath = process.env.NODE_ENV === 'production'
+    ? join(__dirname, '../../task-manager-frontend/dist')
+    : join(__dirname, '../task-manager-frontend/dist');
+
+app.use(express.static(frontendPath));
 
 // Handle React routing, return all requests to React app
 app.get('/', (req, res) => {
-    res.sendFile(join(__dirname, '../task-manager-frontend/dist/index.html'));
+    res.sendFile(join(frontendPath, 'index.js'));
 });
 
 // Handle all other routes
 app.get('/:path', (req, res) => {
-    res.sendFile(join(__dirname, '../task-manager-frontend/dist/index.html'));
+    res.sendFile(join(frontendPath, 'index.js'));
 });
 
 const PORT = process.env.PORT || 5000;
