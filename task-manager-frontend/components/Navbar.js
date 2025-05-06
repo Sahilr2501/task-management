@@ -1,9 +1,10 @@
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
 import { AuthContext } from '../context/AuthContext';
 
-export default function Navbar() {
+function NavbarComponent() {
     const { user, logout } = useContext(AuthContext);
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -102,3 +103,8 @@ export default function Navbar() {
         </nav>
     );
 }
+
+// Export a client-side only version of the Navbar
+export default dynamic(() => Promise.resolve(NavbarComponent), {
+    ssr: false
+});
