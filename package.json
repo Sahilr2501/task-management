@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/Sahilr2501/task-management#readme",
   "dependencies": {
-    "next": "^15.3.1"
+    "next": "^15.3.1",
+    "nodemon": "^3.1.10"
   }
 }
