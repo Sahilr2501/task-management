@@ -12,6 +12,14 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
     config => {
+        // Log the request
+        console.log('Making request:', {
+            url: config.url,
+            method: config.method,
+            data: config.data,
+            headers: config.headers
+        });
+
         const token = localStorage.getItem('token'); // or get it from context
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -19,6 +27,7 @@ api.interceptors.request.use(
         return config;
     },
     error => {
+        console.error('Request error:', error);
         return Promise.reject(error);
     }
 );
@@ -27,8 +36,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     response => {
         // Log successful response
-        console.log('Response Status:', response.status);
-        console.log('Response Data:', response.data);
+        console.log('Response received:', {
+            status: response.status,
+            data: response.data,
+            headers: response.headers
+        });
         return response;
     },
     error => {

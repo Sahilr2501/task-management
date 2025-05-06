@@ -6,23 +6,50 @@ import Modal from '../components/Modal';
 
 export default function Login() {
     const { login } = useContext(AuthContext);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
 
+        // Validate form
+        if (!formData.email || !formData.password) {
+            setError('Please fill in all fields');
+            setIsModalOpen(true);
+            setIsLoading(false);
+            return;
+        }
+
+        // Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            setError('Please enter a valid email address');
+            setIsModalOpen(true);
+            setIsLoading(false);
+            return;
+        }
+
         try {
-            await login(email, password);
+            await login(formData.email.trim(), formData.password);
             router.push('/dashboard');
         } catch (error) {
-            setError(error.message);
+            console.error('Login error:', error);
+            setError(error.message || 'An error occurred during login');
             setIsModalOpen(true);
         } finally {
             setIsLoading(false);
@@ -42,12 +69,13 @@ export default function Login() {
                         <div className="mt-1">
                             <input
                                 id="email"
+                                name="email"
                                 type="email"
                                 required
                                 className="appearance-none block w-full px-3 py-2 border border-[#4F1C51] rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#210F37] focus:border-[#210F37]"
                                 placeholder="Enter your email"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
+                                value={formData.email}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>
@@ -59,12 +87,13 @@ export default function Login() {
                         <div className="mt-1">
                             <input
                                 id="password"
+                                name="password"
                                 type="password"
                                 required
                                 className="appearance-none block w-full px-3 py-2 border border-[#4F1C51] rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#210F37] focus:border-[#210F37]"
                                 placeholder="Enter your password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
+                                value={formData.password}
+                                onChange={handleChange}
                             />
                         </div>
                     </div>

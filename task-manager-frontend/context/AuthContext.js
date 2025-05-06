@@ -31,8 +31,26 @@ export function AuthProvider({ children }) {
 
     const login = async (email, password) => {
         try {
-            const res = await api.post('/users/login', { email, password });
-            const { token, user: userData } = res.data;
+            console.log('Attempting login with:', { email });
+
+            // Validate input
+            if (!email || !password) {
+                throw new Error('Email and password are required');
+            }
+
+            const response = await api.post('/users/login', {
+                email: email.trim(),
+                password: password.trim()
+            });
+
+            console.log('Login response:', response.data);
+
+            const { token, user: userData } = response.data;
+
+            if (!token || !userData) {
+                throw new Error('Invalid response from server');
+            }
+
             localStorage.setItem('token', token);
             setUser(userData);
             return userData;
@@ -41,24 +59,32 @@ export function AuthProvider({ children }) {
                 message: error.message,
                 response: error.response?.data,
                 status: error.response?.status,
-                headers: error.response?.headers
+                headers: error.response?.headers,
+                request: {
+                    url: error.config?.url,
+                    method: error.config?.method,
+                    data: error.config?.data
+                }
             });
 
             if (error.response) {
-                switch (error.response.status) {
+                const { status, data } = error.response;
+                switch (status) {
+                    case 400:
+                        throw new Error(data.message || 'Invalid email or password format');
                     case 401:
                         throw new Error('Invalid email or password');
                     case 404:
-                        throw new Error('Login service not found. Please check server configuration.');
+                        throw new Error('Login service not found');
                     case 500:
-                        throw new Error('Server error. Please try again later.');
+                        throw new Error(data.message || 'Server error. Please try again later.');
                     default:
-                        throw new Error(error.response.data?.message || 'Login failed. Please try again.');
+                        throw new Error(data.message || 'Login failed. Please try again.');
                 }
             } else if (error.request) {
                 throw new Error('No response from server. Please check your connection.');
             } else {
-                throw new Error('Login failed. Please try again.');
+                throw new Error(error.message || 'Login failed. Please try again.');
             }
         }
     };

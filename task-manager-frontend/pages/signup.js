@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { AuthContext } from '../context/AuthContext';
 import Link from 'next/link';
 import Modal from '../components/Modal';
+import api from '../services/api';
 
 export default function Signup() {
     const router = useRouter();
@@ -44,28 +45,19 @@ export default function Signup() {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/api/auth/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
-                    password: formData.password,
-                }),
+            // Use our API service instead of fetch
+            const response = await api.post('/users/register', {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Something went wrong');
-            }
-
+            // If registration is successful, log the user in
             await login(formData.email, formData.password);
             router.push('/dashboard');
         } catch (error) {
-            setError(error.message);
+            console.error('Signup error:', error);
+            setError(error.response?.data?.message || error.message || 'Something went wrong');
             setIsModalOpen(true);
         } finally {
             setIsLoading(false);
