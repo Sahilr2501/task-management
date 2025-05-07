@@ -1,11 +1,13 @@
 import { useEffect, useState, useContext } from 'react';
 import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 import TaskCard from '../components/TaskCard';
 import TaskForm from '../components/TaskForm';
 import { AuthContext } from '../context/AuthContext';
 import { getTasks, createTask } from '../services/taskService';
 
-export default function Dashboard() {
+// Disable SSR for the dashboard
+const Dashboard = () => {
     const router = useRouter();
     const { user, logout } = useContext(AuthContext);
     const [tasks, setTasks] = useState([]);
@@ -125,4 +127,9 @@ export default function Dashboard() {
             </div>
         </div>
     );
-}
+};
+
+// Export with no SSR
+export default dynamic(() => Promise.resolve(Dashboard), {
+    ssr: false
+});
