@@ -9,22 +9,22 @@ const withPWA = require('next-pwa')({
 const nextConfig = {
     reactStrictMode: true,
     swcMinify: true,
-    // Configure for static export
-    output: 'export',
-    // Disable image optimization during export
+    // Configure for Render deployment
     images: {
-        unoptimized: true,
+        domains: ['localhost', 'your-backend-url.onrender.com'],
     },
-    // Disable static optimization for pages that use client-side features
+    // Enable server-side rendering
     experimental: {
-        // This will make all pages use client-side rendering
         appDir: false,
     },
-    // Ensure client-side features work
+    // Enable runtime features
     unstable_runtimeJS: true,
     unstable_JsPreload: false,
-    // Configure trailing slashes for static export
-    trailingSlash: true,
+    // Configure for Render
+    distDir: '.next',
+    poweredByHeader: false,
+    generateEtags: true,
+    compress: true,
 }
 
 module.exports = withPWA(nextConfig); 

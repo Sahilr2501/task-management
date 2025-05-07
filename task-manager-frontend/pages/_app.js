@@ -2,7 +2,7 @@ import '../styles/globals.css';
 import { AuthProvider } from '../context/AuthContext';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Dynamically import Navbar with no SSR
 const Navbar = dynamic(() => import('../components/Navbar'), {
@@ -11,6 +11,11 @@ const Navbar = dynamic(() => import('../components/Navbar'), {
 
 function MyApp({ Component, pageProps }) {
     const router = useRouter();
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     useEffect(() => {
         // Handle client-side navigation
@@ -23,6 +28,10 @@ function MyApp({ Component, pageProps }) {
             router.events.off('routeChangeComplete', handleRouteChange);
         };
     }, [router]);
+
+    if (!isClient) {
+        return null; // or a loading spinner
+    }
 
     return (
         <AuthProvider>

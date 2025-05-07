@@ -6,7 +6,6 @@ import TaskForm from '../components/TaskForm';
 import { AuthContext } from '../context/AuthContext';
 import { getTasks, createTask } from '../services/taskService';
 
-// Disable SSR for the dashboard
 const Dashboard = () => {
     const router = useRouter();
     const { user, logout } = useContext(AuthContext);
@@ -14,8 +13,15 @@ const Dashboard = () => {
     const [error, setError] = useState(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isClient) return;
+
         if (!user) {
             router.push('/login');
             return;
@@ -40,7 +46,7 @@ const Dashboard = () => {
             }
         }
         fetchTasks();
-    }, [user, router, logout]);
+    }, [user, router, logout, isClient]);
 
     const handleTaskCreate = async (taskData) => {
         try {
@@ -69,7 +75,7 @@ const Dashboard = () => {
         setTasks(prev => prev.filter(task => task._id !== taskId));
     };
 
-    if (!user) {
+    if (!isClient || !user) {
         return null; // Will redirect to login
     }
 
