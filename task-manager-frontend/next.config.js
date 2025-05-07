@@ -11,39 +11,17 @@ const nextConfig = {
     swcMinify: true,
     // Configure for Render deployment
     images: {
-        domains: ['localhost', 'your-backend-url.onrender.com'],
+        domains: ['localhost', 'task-management-backend-m1qu.onrender.com'],
     },
-    // Disable static optimization for pages that use client-side features
+    // Enable static optimization
     typescript: {
         ignoreBuildErrors: true,
     },
     eslint: {
         ignoreDuringBuilds: true,
     },
-    // Disable static optimization for specific pages
-    exportPathMap: async function () {
-        return {
-            '/': { page: '/' },
-            '/dashboard': { page: '/dashboard' },
-            '/login': { page: '/login' },
-            '/register': { page: '/register' },
-            '/signup': { page: '/signup' },
-        }
-    },
-    // Disable static optimization
-    staticPageGenerationTimeout: 0,
-    // Disable static optimization for all pages
-    experimental: {
-        appDir: false,
-        // Disable static optimization
-        optimizeCss: false,
-        optimizeImages: false,
-        optimizeFonts: false,
-    },
-    // Enable server-side rendering
-    unstable_runtimeJS: true,
-    unstable_JsPreload: false,
-    // Configure for Render
+    // Configure for production
+    output: 'standalone',
     distDir: '.next',
     poweredByHeader: false,
     generateEtags: true,
