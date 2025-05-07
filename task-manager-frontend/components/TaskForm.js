@@ -73,55 +73,58 @@ export default function TaskForm({ onTaskCreated }) {
     };
 
     return (
-        <div className="bg-gray-800 p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4 text-white">Create New Task</h3>
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+            <h3 className="text-2xl font-semibold mb-6 text-gray-800">Create New Task</h3>
 
             {error && (
-                <div className="mb-4 p-3 bg-red-900 text-red-100 rounded">
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     {error}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-1">
-                        Title *
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                        Title <span className="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
                         id="title"
                         name="title"
                         required
-                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                         placeholder="Enter task title"
                         value={form.title}
                         onChange={handleChange}
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-300 mb-1">
-                            Due Date *
+                        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
+                            Due Date <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="dueDate"
                             name="dueDate"
                             type="date"
                             required
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                             value={form.dueDate}
                             onChange={handleChange}
                         />
                     </div>
                     <div>
-                        <label htmlFor="priority" className="block text-sm font-medium text-gray-300 mb-1">
+                        <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
                             Priority
                         </label>
                         <select
                             id="priority"
                             name="priority"
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                             value={form.priority}
                             onChange={handleChange}
                         >
@@ -131,13 +134,13 @@ export default function TaskForm({ onTaskCreated }) {
                         </select>
                     </div>
                     <div>
-                        <label htmlFor="status" className="block text-sm font-medium text-gray-300 mb-1">
+                        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
                             Status
                         </label>
                         <select
                             id="status"
                             name="status"
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                             value={form.status}
                             onChange={handleChange}
                         >
@@ -149,30 +152,49 @@ export default function TaskForm({ onTaskCreated }) {
                 </div>
 
                 <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                         Description
                     </label>
                     <textarea
                         id="description"
                         name="description"
-                        rows="3"
-                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows="4"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-none"
                         placeholder="Enter task description"
                         value={form.description}
                         onChange={handleChange}
                     />
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`w-full py-2 px-4 rounded text-white font-medium ${isLoading
-                        ? 'bg-gray-600 cursor-not-allowed'
-                        : 'bg-blue-600 hover:bg-blue-700'
-                        }`}
-                >
-                    {isLoading ? 'Creating...' : 'Create Task'}
-                </button>
+                <div className="flex justify-end space-x-4">
+                    <button
+                        type="button"
+                        onClick={() => onTaskCreated(null)}
+                        className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition duration-200"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className={`px-6 py-2 rounded-lg text-white font-medium transition duration-200 ${isLoading
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                            }`}
+                    >
+                        {isLoading ? (
+                            <span className="flex items-center">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Creating...
+                            </span>
+                        ) : (
+                            'Create Task'
+                        )}
+                    </button>
+                </div>
             </form>
         </div>
     );
