@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useContext, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 import { AuthContext } from '../context/AuthContext';
 
 function NavbarComponent() {

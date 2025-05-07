@@ -1,7 +1,7 @@
 import '../styles/globals.css';
 import { AuthProvider } from '../context/AuthContext';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 import { useEffect, useState } from 'react';
 
 // Dynamically import Navbar with no SSR

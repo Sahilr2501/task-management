@@ -1,10 +1,16 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/compat/router';
 import api from '../services/api';
+import dynamic from 'next/dynamic';
 
-export default function Register() {
+const RegisterComponent = () => {
     const [form, setForm] = useState({ name: '', email: '', password: '' });
     const router = useRouter();
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,6 +21,10 @@ export default function Register() {
         await api.post('/users/register', form);
         router.push('/login');
     };
+
+    if (!isClient) {
+        return null;
+    }
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -27,4 +37,9 @@ export default function Register() {
             </form>
         </div>
     );
-}
+};
+
+// Export with no SSR
+export default dynamic(() => Promise.resolve(RegisterComponent), {
+    ssr: false
+});

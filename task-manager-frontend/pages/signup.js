@@ -1,11 +1,12 @@
-import { useState, useContext } from 'react';
-import { useRouter } from 'next/router';
+import { useState, useContext, useEffect } from 'react';
+import { useRouter } from 'next/compat/router';
 import { AuthContext } from '../context/AuthContext';
 import Link from 'next/link';
 import Modal from '../components/Modal';
 import api from '../services/api';
+import dynamic from 'next/dynamic';
 
-export default function Signup() {
+const SignupComponent = () => {
     const router = useRouter();
     const { login } = useContext(AuthContext);
     const [formData, setFormData] = useState({
@@ -17,6 +18,11 @@ export default function Signup() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -63,6 +69,10 @@ export default function Signup() {
             setIsLoading(false);
         }
     };
+
+    if (!isClient) {
+        return null;
+    }
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-[#DCA06D]">
@@ -168,4 +178,9 @@ export default function Signup() {
             />
         </div>
     );
-} 
+};
+
+// Export with no SSR
+export default dynamic(() => Promise.resolve(SignupComponent), {
+    ssr: false
+}); 

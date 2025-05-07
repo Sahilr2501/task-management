@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 import dynamic from 'next/dynamic';
 import TaskCard from '../components/TaskCard';
 import TaskForm from '../components/TaskForm';
