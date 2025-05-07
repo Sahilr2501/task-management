@@ -4,6 +4,7 @@ import User from '../models/User.js';
 
 const generateToken = id => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+// Register a new user
 export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -40,25 +41,22 @@ export const register = async (req, res) => {
             return res.status(500).json({ message: 'Server configuration error' });
         }
 
-        // Create user
+        // Create new user
         const user = await User.create({
-            name: name.trim(),
-            email: email.trim().toLowerCase(),
+            name,
+            email,
             password
         });
 
         // Generate token
-        const token = generateToken(user._id);
+        const token = user.generateToken();
 
-        // Send response
         res.status(201).json({
-            token,
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            token
         });
     } catch (error) {
         console.error('Registration error details:', {
@@ -80,12 +78,13 @@ export const register = async (req, res) => {
         }
 
         res.status(500).json({
-            message: 'Error registering user',
+            message: 'Error creating user',
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };
 
+// Login user
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -111,23 +110,20 @@ export const login = async (req, res) => {
         }
 
         // Check password
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         // Generate token
-        const token = generateToken(user._id);
+        const token = user.generateToken();
 
-        // Send response
         res.json({
-            token,
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            token
         });
     } catch (error) {
         console.error('Login error details:', {
@@ -143,6 +139,7 @@ export const login = async (req, res) => {
     }
 };
 
+// Get user profile
 export const getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('-password');
@@ -153,5 +150,85 @@ export const getProfile = async (req, res) => {
     } catch (error) {
         console.error('Profile fetch error:', error);
         res.status(500).json({ message: 'Error fetching profile' });
+    }
+};
+
+// Update user profile
+export const updateProfile = async (req, res) => {
+    try {
+        const { name, email, notificationPreferences } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (notificationPreferences) {
+            user.notificationPreferences = {
+                ...user.notificationPreferences,
+                ...notificationPreferences
+            };
+        }
+
+        await user.save();
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            notificationPreferences: user.notificationPreferences
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating profile' });
+    }
+};
+
+// Get all users (admin only)
+export const getAllUsers = async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to access this resource' });
+        }
+
+        const users = await User.find().select('-password');
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Error fetching users' });
+    }
+};
+
+// Update user role (admin only)
+export const updateUserRole = async (req, res) => {
+    try {
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized to update user roles' });
+        }
+
+        const { userId } = req.params;
+        const { role } = req.body;
+
+        // Validate role
+        if (!['admin', 'manager', 'user'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.role = role;
+        await user.save();
+
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        });
+    } catch (error) {
+        console.error('Error updating user role:', error);
+        res.status(500).json({ message: 'Error updating user role' });
     }
 };

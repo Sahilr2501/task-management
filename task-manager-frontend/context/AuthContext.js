@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { login as apiLogin } from '../services/api';
 
 export const AuthContext = createContext();
 
@@ -38,33 +39,32 @@ export function AuthProvider({ children }) {
                 throw new Error('Email and password are required');
             }
 
-            const response = await api.post('/users/login', {
+            const response = await apiLogin({
                 email: email.trim(),
                 password: password.trim()
             });
 
-            console.log('Login response:', response.data);
+            console.log('Login response:', response);
 
-            const { token, user: userData } = response.data;
-
-            if (!token || !userData) {
+            if (!response || !response.token) {
                 throw new Error('Invalid response from server');
             }
 
-            localStorage.setItem('token', token);
-            setUser(userData);
-            return userData;
+            // Store token and user data
+            localStorage.setItem('token', response.token);
+            setUser({
+                _id: response._id,
+                name: response.name,
+                email: response.email,
+                role: response.role
+            });
+
+            return response;
         } catch (error) {
             console.error('Login error details:', {
                 message: error.message,
                 response: error.response?.data,
-                status: error.response?.status,
-                headers: error.response?.headers,
-                request: {
-                    url: error.config?.url,
-                    method: error.config?.method,
-                    data: error.config?.data
-                }
+                status: error.response?.status
             });
 
             if (error.response) {

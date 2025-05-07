@@ -1,17 +1,25 @@
 import express from 'express';
 import {
-    createTask, getMyTasks, getCreatedTasks, getAllTasks,
-    updateTask, deleteTask
+    getTasks,
+    createTask,
+    updateTask,
+    deleteTask,
+    markNotificationAsRead
 } from '../controllers/taskController.js';
-import protect from '../middleware/auth.js';
+import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// All routes are protected
 router.use(protect);
+
+// Task routes
+router.get('/', getTasks);
 router.post('/', createTask);
-router.get('/', getAllTasks);
-router.get('/assigned', getMyTasks);
-router.get('/created', getCreatedTasks);
 router.put('/:id', updateTask);
 router.delete('/:id', deleteTask);
+
+// Notification routes
+router.put('/:id/notifications/:notificationId/read', markNotificationAsRead);
 
 export default router;

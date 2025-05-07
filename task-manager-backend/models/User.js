@@ -1,22 +1,25 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: [true, 'Please provide a name'],
         trim: true
     },
     email: {
         type: String,
-        required: true,
+        required: [true, 'Please provide an email'],
         unique: true,
         trim: true,
-        lowercase: true
+        lowercase: true,
+        match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
     },
     password: {
         type: String,
-        required: true
+        required: [true, 'Please provide a password'],
+        minlength: [6, 'Password must be at least 6 characters long']
     },
     role: {
         type: String,
@@ -45,6 +48,8 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
+}, {
+    timestamps: true
 });
 
 // Hash password before saving
@@ -62,7 +67,20 @@ userSchema.pre('save', async function (next) {
 
 // Method to compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
-    return bcrypt.compare(candidatePassword, this.password);
+    try {
+        return await bcrypt.compare(candidatePassword, this.password);
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Method to generate JWT token
+userSchema.methods.generateToken = function () {
+    return jwt.sign(
+        { id: this._id },
+        process.env.JWT_SECRET,
+        { expiresIn: '30d' }
+    );
 };
 
 // Method to check if user has required role

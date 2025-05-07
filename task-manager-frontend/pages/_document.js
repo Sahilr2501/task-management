@@ -9,6 +9,7 @@ export default function Document() {
                 <link rel="icon" href="/favicon.ico" />
                 <meta name="description" content="Task Manager Application" />
                 <meta name="theme-color" content="#210F37" />
+                <script src="https://cdn.tailwindcss.com"></script>
             </Head>
             <body>
                 <Main />

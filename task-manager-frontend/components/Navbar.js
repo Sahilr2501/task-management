@@ -1,110 +1,117 @@
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/compat/router';
 import { AuthContext } from '../context/AuthContext';
+import { markNotificationAsRead } from '../services/taskService';
 
-function NavbarComponent() {
-    const { user, logout } = useContext(AuthContext);
+const Navbar = () => {
     const router = useRouter();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user, logout } = useContext(AuthContext);
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const [isClient, setIsClient] = useState(false);
 
-    const handleLogout = () => {
-        if (window.confirm('Are you sure you want to logout?')) {
-            logout();
-            router.push('/login');
-            setIsMenuOpen(false);
+    useEffect(() => {
+        setIsClient(true);
+        if (user) {
+            // Fetch notifications when user is logged in
+            fetchNotifications();
+        }
+    }, [user]);
+
+    const fetchNotifications = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/notifications`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            setNotifications(data);
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
         }
     };
 
+    const handleNotificationClick = async (taskId, notificationId) => {
+        try {
+            await markNotificationAsRead(taskId, notificationId);
+            setNotifications(prev =>
+                prev.filter(notification => notification._id !== notificationId)
+            );
+            router.push(`/dashboard?task=${taskId}`);
+        } catch (error) {
+            console.error('Failed to mark notification as read:', error);
+        }
+    };
+
+    const handleLogout = () => {
+        logout();
+        router.push('/login');
+    };
+
+    if (!isClient) {
+        return null;
+    }
+
     return (
-        <nav className="bg-primary text-white p-4 shadow-lg">
-            <div className="max-w-7xl mx-auto flex justify-between items-center">
-                <h1 className="font-bold text-lg">Task Manager</h1>
-
-                {/* Mobile Menu Button */}
-                <button
-                    className="md:hidden p-2 rounded hover:bg-[#4F1C51] focus:outline-none"
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {isMenuOpen ? (
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        ) : (
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        )}
-                    </svg>
-                </button>
-
-                {/* Desktop Menu */}
-                <div className="hidden md:flex items-center space-x-4">
-                    {user ? (
+        <nav className="bg-gray-900 text-white p-4 border-b border-gray-700">
+            <div className="container mx-auto flex justify-between items-center">
+                <div className="flex items-center space-x-4">
+                    <Link href="/" className="text-xl font-bold text-white hover:text-blue-400 transition-colors">
+                        Task Manager
+                    </Link>
+                    {user && (
                         <>
-                            <Link href="/dashboard" className="hover:text-[#DCA06D] transition-colors border border-white px-3 py-1 rounded-md">
+                            <Link href="/dashboard" className="text-gray-300 hover:text-blue-400 transition-colors">
                                 Dashboard
                             </Link>
+                            {user.role === 'admin' && (
+                                <Link href="/admin" className="text-gray-300 hover:text-blue-400 transition-colors">
+                                    Admin
+                                </Link>
+                            )}
+                        </>
+                    )}
+                </div>
+                <div className="flex items-center space-x-4">
+                    {user ? (
+                        <>
+                            <span className="text-sm text-gray-300">
+                                {user.name} ({user.role})
+                            </span>
                             <button
-                                onClick={handleLogout}
-                                className="hover:text-[#DCA06D] transition-colors border border-white px-3 py-1 rounded-md"
+                                onClick={logout}
+                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
                             >
                                 Logout
                             </button>
                         </>
                     ) : (
                         <>
-                            <Link href="/login" className="hover:text-[#DCA06D] transition-colors border border-white px-3 py-1 rounded-md">
-                                Sign In
+                            <Link
+                                href="/login"
+                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                            >
+                                Login
                             </Link>
-                            <Link href="/signup" className="hover:text-[#DCA06D] transition-colors border border-white px-3 py-1 rounded-md">
+                            <Link
+                                href="/signup"
+                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                            >
                                 Sign Up
                             </Link>
                         </>
                     )}
                 </div>
             </div>
-
-            {/* Mobile Menu */}
-            <div className={`md:hidden absolute top-16 left-0 right-0 bg-primary p-4 space-y-4 ${isMenuOpen ? 'block' : 'hidden'}`}>
-                {user ? (
-                    <>
-                        <Link
-                            href="/dashboard"
-                            className="block py-2 hover:text-[#DCA06D] transition-colors border border-white px-3 py-1 rounded-md mb-2"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            Dashboard
-                        </Link>
-                        <button
-                            onClick={handleLogout}
-                            className="block w-full text-left py-2 hover:text-[#DCA06D] transition-colors border border-white px-3 py-1 rounded-md"
-                        >
-                            Logout
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <Link
-                            href="/login"
-                            className="block py-2 hover:text-[#DCA06D] transition-colors border border-white px-3 py-1 rounded-md mb-2"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            Sign In
-                        </Link>
-                        <Link
-                            href="/signup"
-                            className="block py-2 hover:text-[#DCA06D] transition-colors border border-white px-3 py-1 rounded-md"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            Sign Up
-                        </Link>
-                    </>
-                )}
-            </div>
         </nav>
     );
-}
+};
 
 // Export a client-side only version of the Navbar
-export default dynamic(() => Promise.resolve(NavbarComponent), {
+export default dynamic(() => Promise.resolve(Navbar), {
     ssr: false
 });

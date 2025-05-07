@@ -1,69 +1,134 @@
 import axios from 'axios';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+// Create axios instance with default config
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api', // or your deployed URL
+    baseURL: API_URL,
     headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-    withCredentials: true // Enable sending cookies if needed
+        'Content-Type': 'application/json'
+    }
 });
 
-// Request interceptor
+// Add request interceptor to add auth token
 api.interceptors.request.use(
-    config => {
-        // Log the request
-        console.log('Making request:', {
-            url: config.url,
-            method: config.method,
-            data: config.data,
-            headers: config.headers
-        });
-
-        const token = localStorage.getItem('token'); // or get it from context
+    (config) => {
+        const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
-    error => {
-        console.error('Request error:', error);
+    (error) => {
         return Promise.reject(error);
     }
 );
 
-// Response interceptor
+// Add response interceptor to handle errors
 api.interceptors.response.use(
-    response => {
-        // Log successful response
-        console.log('Response received:', {
-            status: response.status,
-            data: response.data,
-            headers: response.headers
-        });
-        return response;
-    },
-    error => {
-        // Log detailed error information
-        console.error('Response Error:', {
-            status: error.response?.status,
-            statusText: error.response?.statusText,
-            data: error.response?.data,
-            headers: error.response?.headers,
-            config: {
-                url: error.config?.url,
-                method: error.config?.method,
-                headers: error.config?.headers,
-                data: error.config?.data
-            }
-        });
-
-        if (error.response?.status === 401) {
-            // Clear token on authentication error
-            localStorage.removeItem('token');
+    (response) => response,
+    (error) => {
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            const errorMessage = error.response.data?.message || 'An error occurred';
+            console.error('Response Error:', {
+                status: error.response.status,
+                message: errorMessage,
+                data: error.response.data
+            });
+            return Promise.reject(new Error(errorMessage));
+        } else if (error.request) {
+            // The request was made but no response was received
+            console.error('Request Error:', error.request);
+            return Promise.reject(new Error('No response from server'));
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.error('Error:', error.message);
+            return Promise.reject(error);
         }
-        return Promise.reject(error);
     }
 );
+
+// Auth API calls
+export const register = async (userData) => {
+    try {
+        const response = await api.post('/users/register', userData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const login = async (credentials) => {
+    try {
+        const response = await api.post('/users/login', credentials);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getProfile = async () => {
+    try {
+        const response = await api.get('/users/profile');
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const updateProfile = async (userData) => {
+    try {
+        const response = await api.put('/users/profile', userData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Task API calls
+export const getTasks = async (queryParams = '') => {
+    try {
+        const response = await api.get(`/tasks?${queryParams}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const createTask = async (taskData) => {
+    try {
+        const response = await api.post('/tasks', taskData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const updateTask = async (taskId, taskData) => {
+    try {
+        const response = await api.put(`/tasks/${taskId}`, taskData);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteTask = async (taskId) => {
+    try {
+        await api.delete(`/tasks/${taskId}`);
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const markNotificationAsRead = async (taskId, notificationId) => {
+    try {
+        await api.put(`/tasks/${taskId}/notifications/${notificationId}/read`);
+    } catch (error) {
+        throw error;
+    }
+};
 
 export default api;

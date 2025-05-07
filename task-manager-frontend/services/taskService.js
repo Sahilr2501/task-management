@@ -1,90 +1,128 @@
-import api from './api';
+import axios from 'axios';
 
-export const getTasks = async () => {
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+// Get all tasks with filtering
+export const getTasks = async (queryParams = '') => {
     try {
-        const res = await api.get('/tasks');
-        return res.data;
-    } catch (err) {
-        if (err.response?.status === 401) {
-            localStorage.removeItem('token');
+        const token = localStorage.getItem('token');
+        if (!token) {
             throw new Error('Authentication required. Please log in.');
         }
-        console.error("Failed to fetch tasks:", err);
-        throw new Error(err.response?.data?.message || 'Failed to fetch tasks');
+
+        const response = await axios.get(`${API_URL}/tasks?${queryParams}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response?.status === 401) {
+            throw new Error('Authentication required. Please log in.');
+        }
+        throw error;
     }
 };
 
+// Create a new task
 export const createTask = async (taskData) => {
     try {
-        // Validate required fields
-        if (!taskData.title) {
-            throw new Error('Title is required');
-        }
-        if (!taskData.dueDate) {
-            throw new Error('Due date is required');
-        }
-
-        // Format the data to match the backend schema
-        const formattedData = {
-            title: taskData.title.trim(),
-            description: taskData.description?.trim() || '',
-            dueDate: new Date(taskData.dueDate).toISOString(),
-            priority: taskData.priority || 'Medium',
-            status: taskData.status || 'To Do'
-        };
-
-        const res = await api.post('/tasks', formattedData);
-        return res.data;
-    } catch (err) {
-        if (err.response?.status === 401) {
-            localStorage.removeItem('token');
+        const token = localStorage.getItem('token');
+        if (!token) {
             throw new Error('Authentication required. Please log in.');
         }
-        console.error("Failed to create task:", err);
-        throw new Error(err.response?.data?.message || 'Failed to create task');
+
+        const response = await axios.post(`${API_URL}/tasks`, taskData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response?.status === 401) {
+            throw new Error('Authentication required. Please log in.');
+        }
+
+        // Handle validation errors
+        if (error.response?.status === 400) {
+            const errorMessage = error.response.data.message;
+            if (error.response.data.errors) {
+                throw new Error(error.response.data.errors.join(', '));
+            }
+            throw new Error(errorMessage || 'Invalid task data');
+        }
+
+        // Handle other errors
+        throw new Error(error.response?.data?.message || 'Failed to create task. Please try again.');
     }
 };
 
+// Update a task
 export const updateTask = async (taskId, taskData) => {
     try {
-        // Validate required fields
-        if (!taskData.title) {
-            throw new Error('Title is required');
-        }
-        if (!taskData.dueDate) {
-            throw new Error('Due date is required');
-        }
-
-        // Format the data to match the backend schema
-        const formattedData = {
-            title: taskData.title.trim(),
-            description: taskData.description?.trim() || '',
-            dueDate: new Date(taskData.dueDate).toISOString(),
-            priority: taskData.priority || 'Medium',
-            status: taskData.status || 'To Do'
-        };
-
-        const res = await api.put(`/tasks/${taskId}`, formattedData);
-        return res.data;
-    } catch (err) {
-        if (err.response?.status === 401) {
-            localStorage.removeItem('token');
+        const token = localStorage.getItem('token');
+        if (!token) {
             throw new Error('Authentication required. Please log in.');
         }
-        console.error("Failed to update task:", err);
-        throw new Error(err.response?.data?.message || 'Failed to update task');
+
+        const response = await axios.put(`${API_URL}/tasks/${taskId}`, taskData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response?.status === 401) {
+            throw new Error('Authentication required. Please log in.');
+        }
+        throw error;
     }
 };
 
+// Delete a task
 export const deleteTask = async (taskId) => {
     try {
-        await api.delete(`/tasks/${taskId}`);
-    } catch (err) {
-        if (err.response?.status === 401) {
-            localStorage.removeItem('token');
+        const token = localStorage.getItem('token');
+        if (!token) {
             throw new Error('Authentication required. Please log in.');
         }
-        console.error("Failed to delete task:", err);
-        throw new Error(err.response?.data?.message || 'Failed to delete task');
+
+        await axios.delete(`${API_URL}/tasks/${taskId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+        if (error.response?.status === 401) {
+            throw new Error('Authentication required. Please log in.');
+        }
+        throw error;
+    }
+};
+
+// Mark notification as read
+export const markNotificationAsRead = async (taskId, notificationId) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Authentication required. Please log in.');
+        }
+
+        await axios.put(
+            `${API_URL}/tasks/${taskId}/notifications/${notificationId}/read`,
+            {},
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+    } catch (error) {
+        if (error.response?.status === 401) {
+            throw new Error('Authentication required. Please log in.');
+        }
+        throw error;
     }
 };

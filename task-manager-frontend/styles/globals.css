@@ -2,31 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
     body {
-        @apply bg-background;
+        @apply bg-background text-text;
     }
 }
 
 @layer components {
     .input {
-        @apply border border-secondary rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary;
+        @apply border border-secondary rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-accent bg-primary text-text;
     }
     
     .btn {
-        @apply bg-primary text-white rounded px-4 py-2 hover:bg-secondary transition-colors duration-200;
-    }
-    
-    .btn-secondary {
         @apply bg-accent text-white rounded px-4 py-2 hover:bg-secondary transition-colors duration-200;
     }
     
+    .btn-secondary {
+        @apply bg-secondary text-white rounded px-4 py-2 hover:bg-accent transition-colors duration-200;
+    }
+    
     .card {
-        @apply bg-white rounded-lg shadow-lg p-6;
+        @apply bg-card rounded-lg shadow-lg p-6 text-text;
     }
     
     .heading {
-        @apply text-2xl font-bold text-primary mb-4;
+        @apply text-2xl font-bold text-text mb-4;
     }
     
     .subheading {
